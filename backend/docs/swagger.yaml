@@ -1,0 +1,131 @@
+definitions:
+  pkg.CreateWebhookRequest:
+    properties:
+      webhook:
+        $ref: '#/definitions/pkg.Webhook'
+    type: object
+  pkg.CreateWebhookResponse:
+    properties:
+      webhook:
+        $ref: '#/definitions/pkg.Webhook'
+    type: object
+  pkg.Request:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: integer
+      headers:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      host:
+        type: string
+      method:
+        type: string
+      path:
+        type: string
+      uuid:
+        type: string
+      webhook_uuid:
+        type: string
+    type: object
+  pkg.Webhook:
+    properties:
+      created_at:
+        type: integer
+      uuid:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /request/{webhook_uuid}:
+    get:
+      consumes:
+      - application/json
+      description: List requests
+      parameters:
+      - description: Webhook UUID
+        in: path
+        name: webhook_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/pkg.Request'
+            type: array
+      summary: List requests
+      tags:
+      - request
+  /webhook:
+    post:
+      consumes:
+      - application/json
+      description: Create webhook
+      parameters:
+      - description: Webhook
+        in: body
+        name: webhook
+        required: true
+        schema:
+          $ref: '#/definitions/pkg.CreateWebhookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg.CreateWebhookResponse'
+      summary: Create webhook
+      tags:
+      - webhook
+  /webhook/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete webhook
+      parameters:
+      - description: Webhook UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Delete webhook
+      tags:
+      - webhook
+    get:
+      consumes:
+      - application/json
+      description: Get webhook
+      parameters:
+      - description: Webhook UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pkg.CreateWebhookResponse'
+      summary: Get webhook
+      tags:
+      - webhook
+swagger: "2.0"
