@@ -1,5 +1,4 @@
-// Composables
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
@@ -9,17 +8,19 @@ const routes = [
       {
         path: '',
         name: 'Home',
-        // route level code-splitting
-        // this generates a separate chunk (Home-[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import('@/views/Webhook.vue'),
+        component: () => import('@/views/Home.vue'),
       },
+      {
+        path: '/:uuid',
+        name: 'Webhook',
+        component: () => import('@/views/Webhook.vue')
+      }
     ],
   },
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory('/#'),
   routes,
 })
 

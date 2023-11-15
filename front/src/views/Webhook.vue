@@ -1,13 +1,13 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" md="4" class="pa-4">
+      <v-col cols="12" md="3" class="pa-4">
         <RequestsList
             :requests="requests"
             @request-selected="handleRequestSelected"
         />
       </v-col>
-      <v-col cols="12" md="8" class="pa-4">
+      <v-col cols="12" md="9" class="pa-4">
         <WebhookInfo :webhook="webhook" />
         <RequestDetails :request="selectedRequest" />
       </v-col>
