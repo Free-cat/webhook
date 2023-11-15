@@ -11,6 +11,7 @@ type RequestRepository interface {
 	Create(ctx context.Context, webhookUuid string, request *repoRequestModel.Request) (*repoRequestModel.Request, error)
 	Get(ctx context.Context, webhookUuid string, uuid string) (*repoRequestModel.Request, error)
 	Delete(ctx context.Context, webhookUuid string, uuid string) error
+	Subscribe(ctx context.Context, webhookUuid string) (<-chan *repoRequestModel.Request, error)
 }
 
 type WebhookRepository interface {

@@ -57,6 +57,7 @@ func (r *redisRepository) Create(ctx context.Context, webhookUuid string, reques
 		return nil, err
 	}
 	r.redisClient.SAdd(ctx, r.prefix+webhookUuid, string(value))
+	r.redisClient.Publish(ctx, r.prefix+webhookUuid, string(value))
 
 	return request, nil
 }
@@ -76,4 +77,25 @@ func (r *redisRepository) Get(ctx context.Context, webhookUuid string, uuid stri
 
 func (r *redisRepository) Delete(ctx context.Context, webhookUuid string, uuid string) error {
 	return r.redisClient.SRem(ctx, r.prefix+webhookUuid, uuid).Err()
+}
+
+func (r *redisRepository) Subscribe(ctx context.Context, webhookUuid string) (<-chan *repoModel.Request, error) {
+	ch := make(chan *repoModel.Request)
+	redisChannel := r.redisClient.Subscribe(ctx, r.prefix+webhookUuid).Channel()
+
+	go func() {
+		for {
+			select {
+			case msg := <-redisChannel:
+				var request repoModel.Request
+				err := json.Unmarshal([]byte(msg.Payload), &request)
+				if err != nil {
+					log.Printf("error unmarshaling request: %v", err)
+					continue
+				}
+				ch <- &request
+			}
+		}
+	}()
+	return ch, nil
 }

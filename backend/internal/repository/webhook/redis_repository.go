@@ -6,6 +6,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"time"
 	def "webhook/internal/repository"
+	"webhook/internal/repository/errors"
 	repoModel "webhook/internal/repository/webhook/model"
 )
 
@@ -41,9 +42,14 @@ func (r *redisRepository) Create(ctx context.Context, uuid string, webhook *repo
 func (r *redisRepository) Get(ctx context.Context, uuid string) (*repoModel.Webhook, error) {
 	var webhook repoModel.Webhook
 	value, err := r.redisClient.Get(ctx, r.prefix+uuid).Result()
-	if err != nil {
+	if err == redis.Nil {
+		// Handle the "not found" case by returning a custom error.
+		return nil, errors.NotFoundError
+	} else if err != nil {
+		// Handle other errors, if any.
 		return nil, err
 	}
+
 	err = json.Unmarshal([]byte(value), &webhook)
 	if err != nil {
 		return nil, err

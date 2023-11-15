@@ -1,9 +1,10 @@
 package webhook_v1
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"webhook/internal/api/webhook"
+	serviceErrors "webhook/internal/service/errors"
 	desc "webhook/pkg"
 )
 
@@ -30,8 +31,6 @@ func CreateWebhook(webhookImpl *webhook.Implementation) gin.HandlerFunc {
 			ctx.JSON(400, gin.H{"message": err.Error()})
 			return
 		} else {
-			fmt.Printf("%#v\n", request)
-			fmt.Printf("%#v\n", request.Webhook)
 			createResponse, err := webhookImpl.Create(ctx, &request)
 			if err != nil {
 				ctx.JSON(500, gin.H{"message": err.Error()})
@@ -59,7 +58,11 @@ func GetWebhook(webhookImpl *webhook.Implementation) gin.HandlerFunc {
 		uuid := ctx.Param("uuid")
 		getResponse, err := webhookImpl.Get(ctx, uuid)
 		if err != nil {
-			ctx.JSON(500, gin.H{"message": err.Error()})
+			if errors.Is(err, serviceErrors.NotFoundError) {
+				ctx.JSON(404, gin.H{"message": err.Error()})
+			} else {
+				ctx.JSON(500, gin.H{"message": err.Error()})
+			}
 			return
 		} else {
 			ctx.JSON(200, getResponse)

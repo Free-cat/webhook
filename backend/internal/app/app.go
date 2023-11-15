@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	publicApi "webhook/api/public"
 	api "webhook/api/webhook_v1"
@@ -53,6 +54,11 @@ func (app *App) initServiceProvider(_ctx context.Context) error {
 
 func (app *App) initGinServer(_ctx context.Context) error {
 	app.ginServer = gin.Default()
+
+	// Add CORS middleware
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000"} // You can adjust this to specify allowed origins
+	app.ginServer.Use(cors.New(config))
 
 	return nil
 }

@@ -12,6 +12,7 @@ var _ def.RequestRepository = (*inMemoryRepository)(nil)
 type inMemoryRepository struct {
 	requests map[string]*requestArray
 	m        sync.RWMutex
+	Channels map[string]chan *repoModel.Request
 }
 
 type requestArray struct {
@@ -22,6 +23,7 @@ type requestArray struct {
 func NewInMemoryRequestRepository() *inMemoryRepository {
 	return &inMemoryRepository{
 		requests: make(map[string]*requestArray),
+		Channels: make(map[string]chan *repoModel.Request),
 	}
 }
 
@@ -55,6 +57,13 @@ func (r *inMemoryRepository) Create(_ context.Context, websocketUuid string, req
 
 	requests.Count++
 	requests.Requests = append(requests.Requests, request)
+
+	if r.Channels != nil {
+		ch, ok := r.Channels[websocketUuid]
+		if ok {
+			ch <- request
+		}
+	}
 
 	r.requests[websocketUuid] = requests
 
@@ -96,4 +105,14 @@ func (r *inMemoryRepository) Delete(_ context.Context, websocketUuid string, uui
 	}
 
 	return nil
+}
+
+func (r *inMemoryRepository) Subscribe(_ context.Context, websocketUuid string) (<-chan *repoModel.Request, error) {
+	r.m.Lock()
+	defer r.m.Unlock()
+
+	ch := make(chan *repoModel.Request)
+	r.Channels[websocketUuid] = ch
+
+	return ch, nil
 }

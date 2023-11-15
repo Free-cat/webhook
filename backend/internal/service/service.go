@@ -18,4 +18,5 @@ type WebhookPublicService interface {
 type RequestService interface {
 	List(ctx context.Context, webhookUuid string) ([]*model.Request, error)
 	Dump(ctx context.Context, webhookUuid string, request *model.Request) (*model.Request, error)
+	Subscribe(ctx context.Context, webhookUuid string) (<-chan *model.Request, error)
 }
