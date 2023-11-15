@@ -27,21 +27,37 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, PropType, ref, computed } from 'vue';
+import { Webhook } from "@/api";
 
 export default defineComponent({
-  setup() {
-    const hasRequests = ref(false); // Assume no requests to start with
-    const webhookUrl = ref('https://webhook.site/unique-id');
-    const webhookEmail = ref('unique-id@email.webhook.site');
+  props: {
+    webhook: {
+      type: Object as PropType<Webhook>,
+      required: true,
+    },
+  },
+  setup(props) {
     const snackbar = ref(false);
     const snackbarText = ref('');
 
+    const webhookUrl = computed(() => {
+      if (props.webhook && props.webhook.uuid) {
+        return `http://localhost:8080/${props.webhook.uuid}`;
+      }
+      return ''; // Handle the case when webhook or uuid is missing
+    });
+
     const copyUrlToClipboard = async () => {
       try {
-        await navigator.clipboard.writeText(webhookUrl.value);
-        snackbarText.value = 'URL copied to clipboard';
-        snackbar.value = true;
+        if (webhookUrl.value) {
+          await navigator.clipboard.writeText(webhookUrl.value);
+          snackbarText.value = 'URL copied to clipboard';
+          snackbar.value = true;
+        } else {
+          snackbarText.value = 'Webhook data is missing';
+          snackbar.value = true;
+        }
       } catch (err) {
         snackbarText.value = 'Failed to copy URL';
         snackbar.value = true;
@@ -49,9 +65,7 @@ export default defineComponent({
     };
 
     return {
-      hasRequests,
       webhookUrl,
-      webhookEmail,
       snackbar,
       snackbarText,
       copyUrlToClipboard
@@ -74,6 +88,6 @@ code {
   margin-bottom: 10px;
 }
 .info-card {
-  background-color: #f5f5f5;
+  background-color: #ffffff;
 }
 </style>
